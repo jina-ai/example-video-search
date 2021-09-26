@@ -28,3 +28,8 @@ executors:
     uses_metas:
       workspace: $JINA_WORKSPACE
 #    force: True
+  - name: ranker
+    uses: SimpleRanker
+    py_module:
+      - executors.py
+

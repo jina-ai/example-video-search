@@ -6,12 +6,17 @@ import shutil
 import urllib.request
 import string
 import io
+from typing import Optional
+from collections import defaultdict
 
 import numpy as np
 
 from jina import Document, DocumentArray, Executor, requests
 from jina.logging.logger import JinaLogger
 from jina.types.document import _is_datauri
+
+
+_ALLOWED_METRICS = ['min', 'max', 'mean_min', 'mean_max']
 
 
 class FrameExtractor(Executor):
@@ -79,3 +84,50 @@ class FrameExtractor(Executor):
                 shutil.rmtree(_path)
             except OSError as e:
                 self.logger.error(f'Error in deleting {_path}: {e}')
+
+
+class SimpleRanker(Executor):
+    def __init__(
+        self,
+        metric: str = 'cosine',
+        ranking: str = 'min',
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+
+        if ranking not in _ALLOWED_METRICS:
+            raise ValueError(
+                f'ranking should be one of {_ALLOWED_METRICS}, got "{ranking}"',
+            )
+
+        self.metric = metric
+        self.ranking = ranking
+
+    @requests(on='/search')
+    def merge_matches(self, docs: Optional[Document], **kwargs):
+        if not docs:
+            return
+        for doc in docs:
+            parents_scores = defaultdict(list)
+            for m in doc.matches:
+                parents_scores[m.parent_id].append(m.scores[self.metric].value)
+            new_matches = []
+            for match_parent_id, scores in parents_scores.items():
+                if self.ranking == 'min':
+                    score = min(scores)
+                elif self.ranking == 'max':
+                    score = max(scores)
+                elif self.ranking in ['mean_min', 'mean_max']:
+                    score = sum(scores) / len(scores)
+
+                new_matches.append(
+                    Document(id=match_parent_id, scores={self.metric: score})
+                )
+
+            # Sort the matches
+            doc.matches = new_matches
+            if self.ranking in ['min', 'mean_min']:
+                doc.matches.sort(key=lambda d: d.scores[self.metric].value)
+            elif self.ranking in ['max', 'mean_max']:
+                doc.matches.sort(key=lambda d: -d.scores[self.metric].value)

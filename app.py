@@ -13,7 +13,7 @@ def config():
 
 def get_docs(data_path):
     for fn in glob.glob(os.path.join(data_path, '*.mp4')):
-        yield Document(uri=fn)
+        yield Document(uri=fn, id=os.path.basename(fn))
 
 
 def check_index(resp: Request):
@@ -27,7 +27,7 @@ def check_search(resp: Request):
     for doc in resp.docs:
         print(f'{doc.uri}')
         for m in doc.matches:
-            print(f'+- {m.uri}, {m.scores["cosine"].value}')
+            print(f'+- {m.uri}, {m.parent_id}, {m.scores["cosine"].value}')
 
 
 @click.command()
