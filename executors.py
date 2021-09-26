@@ -17,16 +17,34 @@ from jina.types.document import _is_datauri
 
 
 _ALLOWED_METRICS = ['min', 'max', 'mean_min', 'mean_max']
+DEFAULT_FPS = 1
 
 
 class FrameExtractor(Executor):
-    def __init__(self, max_num_frames: int = 20, **kwargs):
+    """
+    Extract the frames from videos with `ffmpeg`
+    """
+    def __init__(self, max_num_frames: int = 50, fps=DEFAULT_FPS, debug=False, **kwargs):
+        """
+
+        :param max_num_frames:
+        :param fps:
+        :param debug: If True, the extracted frames are kept in `{workspace}/{video_fn}/*.jpg`
+        :param kwargs:
+        """
         super().__init__(**kwargs)
         self.max_num_frames = max_num_frames
+        self.fps = fps
         self.logger = JinaLogger(getattr(self.metas, 'name', self.__class__.__name__)).logger
+        self.debug = debug
 
     @requests(on='/index')
     def extract(self, docs: DocumentArray, **kwargs):
+        """
+        Load the video from the Document.uri, extract frames and save the frames into chunks.blob
+
+        :param docs: the input Documents with either the video file name or URL in the `uri` field
+        """
         for doc in docs:
             self.logger.info(f'received {doc.id}')
             frame_fn_list = self._extract(doc.uri)
@@ -38,10 +56,11 @@ class FrameExtractor(Executor):
                 _chunk.blob = np.array(_chunk.blob).astype('uint8')
                 _chunk.uri = frame_fn
                 doc.chunks.append(_chunk)
-            self._delete_tmp(frame_fn_list)
+            if not self.debug:
+                self._delete_tmp(frame_fn_list)
 
     def _extract(self, uri):
-        source_fn = self.save_uri_to_tmp_file(uri) if _is_datauri(uri) else uri
+        source_fn = self._save_uri_to_tmp_file(uri) if _is_datauri(uri) else uri
         self.logger.debug(f'extracting {source_fn}')
         _base_fn = os.path.basename(uri).split('.')[0]
         target_path = os.path.join(self.workspace, f'{_base_fn}')
@@ -49,7 +68,7 @@ class FrameExtractor(Executor):
         os.makedirs(target_path, exist_ok=True)
         try:
             subprocess.check_call(
-                f'ffmpeg -loglevel panic -skip_frame nokey -i {source_fn} -vsync 0 -frame_pts true -s 960x540 '
+                f'ffmpeg -loglevel panic -i {source_fn} -vsync 0 -vf fps={self.fps} -frame_pts true -s 960x540 '
                 f'{os.path.join(target_path, f"%d.jpg")} >/dev/null 2>&1',
                 shell=True)
         except subprocess.CalledProcessError as e:
@@ -61,7 +80,7 @@ class FrameExtractor(Executor):
                 os.remove(source_fn)
             return result[:self.max_num_frames]
 
-    def save_uri_to_tmp_file(self, uri):
+    def _save_uri_to_tmp_file(self, uri):
         req = urllib.request.Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
         tmp_fn = os.path.join(
             self.workspace,
@@ -87,6 +106,9 @@ class FrameExtractor(Executor):
 
 
 class SimpleRanker(Executor):
+    """
+    Aggregate the matches and overwrite document.matches with the aggregated results.
+    """
     def __init__(
         self,
         metric: str = 'cosine',
@@ -119,11 +141,12 @@ class SimpleRanker(Executor):
                     best_id = np.argmin([m.scores[self.metric].value for m in matches])
                 elif self.ranking == 'max':
                     best_id = np.argmax([m.scores[self.metric].value for m in matches])
-                timestamp = self.get_timestamp_from_filename(matches[best_id].uri)
+                timestamp = self._get_timestamp_from_filename(matches[best_id].uri)
                 new_match = Document(
                         id=match_parent_id,
                         scores={self.metric: matches[best_id].scores[self.metric]})
                 new_match.location.append(np.uint32(timestamp))
+                new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
                 new_matches.append(new_match)
 
             # Sort the matches
@@ -133,5 +156,5 @@ class SimpleRanker(Executor):
             elif self.ranking == 'max':
                 doc.matches.sort(key=lambda d: -d.scores[self.metric].value)
 
-    def get_timestamp_from_filename(self, uri):
+    def _get_timestamp_from_filename(self, uri):
         return os.path.basename(uri).split('.')[0]

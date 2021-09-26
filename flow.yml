@@ -12,14 +12,14 @@ executors:
     uses: jinahub://CLIPImageEncoder/v0.1
     uses_with:
       traversal_paths: ['c',]
-    uses_requests:
+    uses_requests:  # override the @requests
       /index: 'encode'
 #    force: True
   - name: text_encoder
     uses: jinahub://CLIPTextEncoder/v0.1
     uses_with:
       traversal_paths: ['r',]
-    uses_requests:
+    uses_requests:  # override the @requests
       /search: 'encode'
   - name: indexer
     uses: jinahub://SimpleTraversalIndexer/v0.1

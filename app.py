@@ -25,9 +25,9 @@ def check_index(resp: Request):
 
 def check_search(resp: Request):
     for doc in resp.docs:
-        print(f'{doc.uri}')
+        print(f'{doc.uri}, {doc.text}')
         for m in doc.matches:
-            print(f'+- {m.id}, {m.location}, {m.scores["cosine"].value}')
+            print(f'+- {m.id}, {m.location}, {m.scores["cosine"].value}, {m.tags["timestamp"]}')
 
 
 @click.command()
@@ -58,7 +58,9 @@ def main(mode):
 
         f.post(
             on='/search',
-            inputs=DocumentArray([Document(text='hello')]),
+            inputs=DocumentArray([
+                Document(text='mountain and road'),
+                Document(text='world map')]),
             on_done=check_search)
 
 if __name__ == '__main__':
