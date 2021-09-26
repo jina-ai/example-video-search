@@ -6,25 +6,25 @@ executors:
       jtype: FrameExtractor
     uses_metas:
       workspace: $JINA_WORKSPACE
+    py_module:
+      - executors.py
   - name: image_encoder
     uses: jinahub://CLIPImageEncoder/v0.1
     uses_with:
-      device: 'cuda:1'
       traversal_paths: ['c',]
+    uses_requests:
+      /index: 'encode'
+#    force: True
   - name: text_encoder
     uses: jinahub://CLIPTextEncoder/v0.1
     uses_with:
-      device: 'cuda:1'
-      traversal_paths:
-        - 'c'
-    needs: gateway
+      traversal_paths: ['r',]
+    uses_requests:
+      /search: 'encode'
   - name: indexer
-    uses: jinahub://SimpleIndexer/v0.4
+    uses: jinahub://SimpleTraversalIndexer/v0.1
+    uses_with:
+      traversal_paths: ['c',]
     uses_metas:
       workspace: $JINA_WORKSPACE
-    needs:
-      - 'text_encoder'
-      - 'image_encoder'
-
-
-
+#    force: True

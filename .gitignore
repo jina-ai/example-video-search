@@ -134,3 +134,6 @@ dmypy.json
 # Mac OS X
 .DS_Store
 toy_data/.DS_Store
+
+# Project
+workspace

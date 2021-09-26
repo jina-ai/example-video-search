@@ -3,6 +3,7 @@ import os
 import click
 
 from jina import Document, DocumentArray, Flow
+from jina.types.request import Request
 
 
 def config():
@@ -15,11 +16,34 @@ def get_docs(data_path):
         yield Document(uri=fn)
 
 
+def check_index(resp: Request):
+    for doc in resp.docs:
+        print(f'{doc.uri}')
+        for c in doc.chunks:
+            print(f'+- {c.uri}, {c.embedding.shape}')
+
+
+def check_search(resp: Request):
+    for doc in resp.docs:
+        print(f'{doc.uri}')
+        for m in doc.matches:
+            print(f'+- {m.uri}, {m.scores["cosine"].value}')
+
+
 @click.command()
 @click.option('--mode', '-m', type=click.Choice(['restful', 'grpc']), default='grpc')
 def main(mode):
     config()
     workspace = os.environ["JINA_WORKSPACE"]
+    if os.path.exists(workspace):
+        print(
+            f'\n +-----------------------------------------------------------------------------------+ \
+              \n |                                   🤖🤖🤖                                           | \
+              \n | The directory {workspace} already exists. Please remove it before indexing again. | \
+              \n |                                   🤖🤖🤖                                           | \
+              \n +-----------------------------------------------------------------------------------+'
+        )
+        return -1
     if mode == 'grpc':
         f = Flow.load_config(
             'flow.yml',
@@ -27,24 +51,15 @@ def main(mode):
                 'protocol': 'grpc',
                 'cors': False})
     with f:
-        if os.path.exists(workspace):
-            print(
-                f'\n +------------------------------------------------------------------------------------+ \
-                  \n |                                   🤖🤖🤖                                           | \
-                  \n | The directory {workspace} already exists. Please remove it before indexing again. | \
-                  \n |                                   🤖🤖🤖                                           | \
-                  \n +------------------------------------------------------------------------------------+'
-            )
-            return -1
-        resp = f.post(
+        f.post(
             on='/index',
-            inputs=get_docs('toy-data'),
-            request_size=2,
-            return_results=True)
-        print(f'resp: {resp}')
+            inputs=get_docs('toy_data'),
+            on_done=check_index)
+
         f.post(
             on='/search',
-            inputs=get_docs('toy-data'),
-            request_size=2,
-            return_results=True)
+            inputs=DocumentArray([Document(text='hello')]),
+            on_done=check_search)
 
+if __name__ == '__main__':
+    main()
