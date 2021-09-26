@@ -109,25 +109,29 @@ class SimpleRanker(Executor):
         if not docs:
             return
         for doc in docs:
-            parents_scores = defaultdict(list)
+            parents_matches = defaultdict(list)
             for m in doc.matches:
-                parents_scores[m.parent_id].append(m.scores[self.metric].value)
+                parents_matches[m.parent_id].append(m)
             new_matches = []
-            for match_parent_id, scores in parents_scores.items():
+            for match_parent_id, matches in parents_matches.items():
+                best_id = 0
                 if self.ranking == 'min':
-                    score = min(scores)
+                    best_id = np.argmin([m.scores[self.metric].value for m in matches])
                 elif self.ranking == 'max':
-                    score = max(scores)
-                elif self.ranking in ['mean_min', 'mean_max']:
-                    score = sum(scores) / len(scores)
-
-                new_matches.append(
-                    Document(id=match_parent_id, scores={self.metric: score})
-                )
+                    best_id = np.argmax([m.scores[self.metric].value for m in matches])
+                timestamp = self.get_timestamp_from_filename(matches[best_id].uri)
+                new_match = Document(
+                        id=match_parent_id,
+                        scores={self.metric: matches[best_id].scores[self.metric]})
+                new_match.location.append(np.uint32(timestamp))
+                new_matches.append(new_match)
 
             # Sort the matches
             doc.matches = new_matches
-            if self.ranking in ['min', 'mean_min']:
+            if self.ranking == 'min':
                 doc.matches.sort(key=lambda d: d.scores[self.metric].value)
-            elif self.ranking in ['max', 'mean_max']:
+            elif self.ranking == 'max':
                 doc.matches.sort(key=lambda d: -d.scores[self.metric].value)
+
+    def get_timestamp_from_filename(self, uri):
+        return os.path.basename(uri).split('.')[0]

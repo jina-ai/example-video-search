@@ -27,7 +27,7 @@ def check_search(resp: Request):
     for doc in resp.docs:
         print(f'{doc.uri}')
         for m in doc.matches:
-            print(f'+- {m.uri}, {m.parent_id}, {m.scores["cosine"].value}')
+            print(f'+- {m.id}, {m.location}, {m.scores["cosine"].value}')
 
 
 @click.command()
