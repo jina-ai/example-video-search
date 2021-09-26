@@ -155,6 +155,7 @@ class SimpleRanker(Executor):
                 doc.matches.sort(key=lambda d: d.scores[self.metric].value)
             elif self.ranking == 'max':
                 doc.matches.sort(key=lambda d: -d.scores[self.metric].value)
+            doc.pop('embedding')
 
     def _get_timestamp_from_filename(self, uri):
         return os.path.basename(uri).split('.')[0]
