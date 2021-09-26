@@ -49,17 +49,17 @@ class FrameExtractor(Executor):
         os.makedirs(target_path, exist_ok=True)
         try:
             subprocess.check_call(
-                f'ffmpeg -loglevel panic -i {source_fn} -vf fps=.5 -frames 10 -s 960x540 '
+                f'ffmpeg -loglevel panic -skip_frame nokey -i {source_fn} -vsync 0 -frame_pts true -s 960x540 '
                 f'{os.path.join(target_path, f"%d.jpg")} >/dev/null 2>&1',
                 shell=True)
         except subprocess.CalledProcessError as e:
             self.logger.error(f'frame extraction failed, {uri}, {e}')
-            return result
-        for fn in glob.glob(f'{target_path}/*.jpg'):
-            result.append(fn)
-        if _is_datauri(uri):
-            os.remove(source_fn)
-        return result[:self.max_num_frames]
+        finally:
+            for fn in glob.glob(f'{target_path}/*.jpg'):
+                result.append(fn)
+            if _is_datauri(uri):
+                os.remove(source_fn)
+            return result[:self.max_num_frames]
 
     def save_uri_to_tmp_file(self, uri):
         req = urllib.request.Request(uri, headers={'User-Agent': 'Mozilla/5.0'})
