@@ -1,0 +1,30 @@
+jtype: Flow
+version: '1'
+executors:
+  - name: frame_extractor
+    uses:
+      jtype: FrameExtractor
+    uses_metas:
+      workspace: $JINA_WORKSPACE
+  - name: image_encoder
+    uses: jinahub://CLIPImageEncoder/v0.1
+    uses_with:
+      device: 'cuda:1'
+      traversal_paths: ['c',]
+  - name: text_encoder
+    uses: jinahub://CLIPTextEncoder/v0.1
+    uses_with:
+      device: 'cuda:1'
+      traversal_paths:
+        - 'c'
+    needs: gateway
+  - name: indexer
+    uses: jinahub://SimpleIndexer/v0.4
+    uses_metas:
+      workspace: $JINA_WORKSPACE
+    needs:
+      - 'text_encoder'
+      - 'image_encoder'
+
+
+
