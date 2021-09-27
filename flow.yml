@@ -6,8 +6,7 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: frame_extractor
-    uses:
-      jtype: FrameExtractor
+    uses: FrameExtractor
     uses_metas:
       workspace: $JINA_WORKSPACE
     py_module:

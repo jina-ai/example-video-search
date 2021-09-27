@@ -27,7 +27,8 @@ def check_search(resp: Request):
 
 @click.command()
 @click.option('--mode', '-m', type=click.Choice(['restful', 'grpc']), default='grpc')
-def main(mode):
+@click.option('--directory', '-d', type=click.Path(exists=True), default='toy_data')
+def main(mode, directory):
     config()
     workspace = os.environ["JINA_WORKSPACE"]
     if os.path.exists(workspace):
@@ -50,7 +51,7 @@ def main(mode):
     with f:
         f.post(
             on='/index',
-            inputs=get_docs('toy_data'))
+            inputs=get_docs(directory))
         if mode == 'grpc':
             f.post(
                 on='/search',
