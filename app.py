@@ -61,9 +61,9 @@ def main(mode, directory):
             f.post(
                 on='/search',
                 inputs=DocumentArray([
-                    Document(text='mountain and road'),
-                    Document(text='This is a world map'),
-                    Document(text='There are many flags of different countries'),
+                    Document(text='a senior man is reading'),
+                    Document(text='a dog and a girl'),
+                    Document(text='a baby is walking with the help from its parents'),
                 ]),
                 on_done=check_search)
         elif mode in ['restful', 'restful_query']:
