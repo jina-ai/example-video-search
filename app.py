@@ -7,9 +7,10 @@ from jina.types.request import Request
 
 
 def config():
-    os.environ['JINA_PORT'] = '45678'
-    os.environ['JINA_WORKSPACE'] = './workspace'
-    os.environ['TOP_K'] = '50'
+    os.environ['JINA_PORT'] = '45678'  # the port for accessing the RESTful service, i.e. http://localhost:45678/docs
+    os.environ['JINA_WORKSPACE'] = './workspace'  # the directory to store the indexed data
+    os.environ['TOP_K'] = '50'  # the maximal number of results to return
+
 
 def get_docs(data_path):
     for fn in glob.glob(os.path.join(data_path, '*.mp4')):
@@ -48,6 +49,9 @@ def main(mode, directory):
                 'cors': False})
     elif mode == 'restful':
         f = Flow.load_config('flow.yml')
+    else:
+        return -1
+
     with f:
         f.post(
             on='/index',
