@@ -27,12 +27,12 @@ def check_search(resp: Request):
 
 
 @click.command()
-@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc']), default='grpc')
+@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query']), default='grpc')
 @click.option('--directory', '-d', type=click.Path(exists=True), default='toy_data')
 def main(mode, directory):
     config()
     workspace = os.environ["JINA_WORKSPACE"]
-    if os.path.exists(workspace):
+    if os.path.exists(workspace) and mode != 'restful_query':
         print(
             f'\n +-----------------------------------------------------------------------------------+ \
               \n |                                   🤖🤖🤖                                           | \
@@ -53,9 +53,10 @@ def main(mode, directory):
         return -1
 
     with f:
-        f.post(
-            on='/index',
-            inputs=get_docs(directory))
+        if mode != 'restful_query':
+            f.post(
+                on='/index',
+                inputs=get_docs(directory))
         if mode == 'grpc':
             f.post(
                 on='/search',
@@ -65,7 +66,7 @@ def main(mode, directory):
                     Document(text='There are many flags of different countries'),
                 ]),
                 on_done=check_search)
-        elif mode == 'restful':
+        elif mode in ['restful', 'restful_query']:
             f.block()
 
 

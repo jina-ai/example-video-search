@@ -54,7 +54,9 @@ class FrameExtractor(Executor):
                 _chunk.convert_uri_to_datauri()
                 _chunk.convert_image_datauri_to_blob()
                 _chunk.blob = np.array(_chunk.blob).astype('uint8')
-                _chunk.uri = frame_fn
+                timestamp = self._get_timestamp_from_filename(frame_fn)
+                _chunk.location.append(np.uint32(timestamp))
+                # _chunk.uri = frame_fn
                 doc.chunks.append(_chunk)
             if not self.debug:
                 self._delete_tmp(frame_fn_list)
@@ -104,6 +106,9 @@ class FrameExtractor(Executor):
             except OSError as e:
                 self.logger.error(f'Error in deleting {_path}: {e}')
 
+    def _get_timestamp_from_filename(self, uri):
+        return os.path.basename(uri).split('.')[0]
+
 
 class SimpleRanker(Executor):
     """
@@ -113,6 +118,7 @@ class SimpleRanker(Executor):
         self,
         metric: str = 'cosine',
         ranking: str = 'min',
+        top_k: int = 10,
         *args,
         **kwargs,
     ):
@@ -125,11 +131,13 @@ class SimpleRanker(Executor):
 
         self.metric = metric
         self.ranking = ranking
+        self.top_k = top_k
 
     @requests(on='/search')
-    def merge_matches(self, docs: Optional[Document], **kwargs):
+    def merge_matches(self, docs: Optional[Document] = [], paramerters = {}, **kwargs):
         if not docs:
             return
+        top_k = int(paramerters.get('top_k', self.top_k))
         for doc in docs:
             parents_matches = defaultdict(list)
             for m in doc.matches:
@@ -141,11 +149,10 @@ class SimpleRanker(Executor):
                     best_id = np.argmin([m.scores[self.metric].value for m in matches])
                 elif self.ranking == 'max':
                     best_id = np.argmax([m.scores[self.metric].value for m in matches])
-                timestamp = self._get_timestamp_from_filename(matches[best_id].uri)
-                new_match = Document(
-                        id=match_parent_id,
-                        scores={self.metric: matches[best_id].scores[self.metric]})
-                new_match.location.append(np.uint32(timestamp))
+                new_match = matches[best_id]
+                new_match.id = matches[best_id].parent_id
+                new_match.scores = {self.metric: matches[best_id].scores[self.metric]}
+                timestamp = matches[best_id].location[0]
                 new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
                 new_matches.append(new_match)
 
@@ -155,7 +162,6 @@ class SimpleRanker(Executor):
                 doc.matches.sort(key=lambda d: d.scores[self.metric].value)
             elif self.ranking == 'max':
                 doc.matches.sort(key=lambda d: -d.scores[self.metric].value)
+            doc.matches = doc.matches[:top_k]
             doc.pop('embedding')
 
-    def _get_timestamp_from_filename(self, uri):
-        return os.path.basename(uri).split('.')[0]

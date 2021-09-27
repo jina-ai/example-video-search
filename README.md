@@ -36,6 +36,17 @@ curl -X 'POST' 'localhost:45678/search' \
 -d '{"data": [{"text": "this is a highway"}]}'
 ```
 
+The retrieved results contains the video filename (id) and the best matched frame in that video together with its 
+timestamp.
+
+![](.github/matches.png)
+
+After indexing once, you can query without indexing by
+
+```bash
+python app.py -m restful_query
+```
+
 
 ## How it works
 The flow is as below
