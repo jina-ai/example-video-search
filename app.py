@@ -57,6 +57,12 @@ def main(mode, directory):
             f.post(
                 on='/index',
                 inputs=get_docs(directory))
+            f.post(
+                on='/sync',
+                parameters={
+                    'only_delta': True, 'startup': True
+                }
+            )
         if mode == 'grpc':
             f.post(
                 on='/search',
