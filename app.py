@@ -1,4 +1,6 @@
 import glob
+import shutil
+
 import os
 import click
 
@@ -35,12 +37,12 @@ def main(mode, directory):
     if os.path.exists(workspace) and mode != 'restful_query':
         print(
             f'\n +-----------------------------------------------------------------------------------+ \
-              \n |                                   🤖🤖🤖                                           | \
-              \n | The directory {workspace} already exists. Please remove it before indexing again. | \
-              \n |                                   🤖🤖🤖                                           | \
+              \n |                                   🤖🤖🤖                                          | \
+              \n | The directory {workspace} already exists. Removing...                             | \
+              \n |                                   🤖🤖🤖                                          | \
               \n +-----------------------------------------------------------------------------------+'
         )
-        return -1
+        shutil.rmtree(workspace)
     if mode == 'grpc':
         f = Flow.load_config(
             'flow.yml',
@@ -71,7 +73,9 @@ def main(mode, directory):
                     Document(text='a dog and a girl'),
                     Document(text='a baby is walking with the help from its parents'),
                 ]),
-                on_done=check_search)
+                on_done=check_search,
+                parameters={'traversal_paths': ['r']}
+            )
         elif mode in ['restful', 'restful_query']:
             f.block()
 

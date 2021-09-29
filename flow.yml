@@ -13,20 +13,24 @@ executors:
       - executors.py
   - name: image_encoder
     uses: jinahub://CLIPImageEncoder/v0.1
+    install_requirements: True
     uses_with:
       traversal_paths: ['c',]
     uses_requests:  # override the @requests
       /index: 'encode'
   - name: text_encoder
     uses: jinahub://CLIPTextEncoder/v0.1
+    install_requirements: True
     uses_with:
       traversal_paths: ['r',]
     uses_requests:  # override the @requests
       /search: 'encode'
   - name: indexer
-    uses: jinahub://FaissPostgresIndexer/v0.1
+    uses: jinahub://FaissPostgresIndexer/latest
+    install_requirements: True
     uses_with:
-      traversal_paths: ['c',]
+      default_traversal_paths: ['c',]
+      total_shards: 1
   - name: ranker
     uses: SimpleRanker
     py_module:
