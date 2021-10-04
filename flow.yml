@@ -30,7 +30,6 @@ executors:
     install_requirements: True
     uses_with:
       default_traversal_paths: ['c',]
-      total_shards: 1
   - name: ranker
     uses: SimpleRanker
     py_module:
