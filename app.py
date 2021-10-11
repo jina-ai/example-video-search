@@ -47,10 +47,10 @@ def main(mode, directory):
             override_with={
                 'protocol': 'grpc',
                 'cors': False})
-    elif mode == 'restful':
+    elif mode in ('restful', 'restful_query'):
         f = Flow.load_config('flow.yml')
-    else:
-        return -1
+    # else:
+    #     return -1
 
     with f:
         if mode != 'restful_query':
