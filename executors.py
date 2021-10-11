@@ -154,6 +154,8 @@ class SimpleRanker(Executor):
                 new_match.scores = {self.metric: matches[best_id].scores[self.metric]}
                 timestamp = matches[best_id].location[0]
                 new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
+                vid = new_match.id.split('.')[0]
+                new_match.uri = f'https://www.youtube.com/watch?v={vid}'
                 new_matches.append(new_match)
 
             # Sort the matches
