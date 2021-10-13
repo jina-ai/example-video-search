@@ -6,14 +6,14 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: frame_extractor
-    uses: jinahub+docker://VideoLoader/v0.1
+    uses: jinahub://VideoLoader/v0.1
   - name: text_encoder
-    uses: jinahub+docker://AudioCLIPTextEncoder/v0.1
+    uses: jinahub+docker://AudioCLIPTextEncoder/v0.3
     uses_with:
       traversal_paths: ['r',]
     needs: gateway
   - name: image_encoder
-    uses: jinahub+docker://AudioCLIPImageEncoder/v0.1
+    uses: jinahub+docker://AudioCLIPImageEncoder/v0.3
     uses_with:
       traversal_paths: ['c',]
     needs: frame_extractor
@@ -27,7 +27,7 @@ executors:
       workspace: $JINA_WORKSPACE
     needs: ['image_encoder', 'text_encoder']
   - name: audio_encoder
-    uses: jinahub+docker://AudioCLIPEncoder/v0.1
+    uses: jinahub+docker://AudioCLIPEncoder/v0.3
     uses_with:
       traversal_paths: ['c',]
     needs: frame_extractor
