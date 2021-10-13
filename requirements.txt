@@ -1,4 +1,4 @@
-jina==2.1.3
+jina==2.1.6
 torch==1.9.0
 transformers==4.9.1
 jina-commons @ git+https://github.com/jina-ai/jina-commons.git@v0.0.5#egg=jina-commons

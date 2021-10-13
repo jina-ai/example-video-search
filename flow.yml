@@ -6,45 +6,40 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: frame_extractor
-    uses: jinahub://VideoLoader/v0.1
-    uses_requests:  # override the @requests
-      /index: 'extract'
+    uses: jinahub+docker://VideoLoader/v0.1
   - name: text_encoder
-    uses: jinahub://AudioCLIPTextEncoder/v0.1
+    uses: jinahub+docker://AudioCLIPTextEncoder/v0.1
     uses_with:
       traversal_paths: ['r',]
-    uses_requests:  # override the @requests
-      /search: 'encode'
+    needs: gateway
   - name: image_encoder
-    uses: jinahub://AudioCLIPImageEncoder/v0.1
+    uses: jinahub+docker://AudioCLIPImageEncoder/v0.1
     uses_with:
       traversal_paths: ['c',]
-    uses_requests:  # override the @requests
-      /index: 'encode'
+    needs: frame_extractor
   - name: image_indexer
-    uses: jinahub://SimpleIndexer/v0.4
+    uses: jinahub+docker://SimpleIndexer/v0.4
     uses_with:
       match_args:
         limit: $TOP_K
         traversal_rdarray: ['c',]
     uses_metas:
       workspace: $JINA_WORKSPACE
-    needs: image_encoder
+    needs: ['image_encoder', 'text_encoder']
   - name: audio_encoder
-    uses: jinahub://AudioCLIPAudioEncoder/v0.1
+    uses: jinahub+docker://AudioCLIPEncoder/v0.1
     uses_with:
       traversal_paths: ['c',]
-    uses_requests:  # override the @requests
-      /index: 'encode'
+    needs: frame_extractor
   - name: audio_indexer
-    uses: jinahub://SimpleIndexer/v0.4
+    uses: jinahub+docker://SimpleIndexer/v0.4
     uses_with:
       match_args:
         limit: $TOP_K
         traversal_rdarray: ['c',]
     uses_metas:
       workspace: $JINA_WORKSPACE
-    needs: audio_encoder
+    needs: ['audio_encoder', 'text_encoder']
   - name: ranker
     uses: MixRanker
     py_module:
