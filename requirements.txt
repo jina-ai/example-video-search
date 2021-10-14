@@ -2,3 +2,13 @@ jina==2.1.6
 torch==1.9.0
 transformers==4.9.1
 jina-commons @ git+https://github.com/jina-ai/jina-commons.git@v0.0.5#egg=jina-commons
+ffmpeg-python==0.2.0
+librosa==0.8.1
+
+torchvision
+pytorch-ignite==0.3.0
+termcolor==1.1.0
+tqdm==4.43.0
+visdom==0.1.8.9
+ftfy==6.0.3
+regex==2021.7.6

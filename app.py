@@ -7,9 +7,15 @@ from jina.types.request import Request
 
 
 def config():
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    model_dir = os.path.join(cur_dir, "models")
+    workspace_dir = os.path.join(cur_dir, "workspace")
     os.environ['JINA_PORT'] = '45678'  # the port for accessing the RESTful service, i.e. http://localhost:45678/docs
     os.environ['JINA_WORKSPACE'] = './workspace'  # the directory to store the indexed data
     os.environ['TOP_K'] = '50'  # the maximal number of results to return
+    os.environ['MODEL_MOUNT_ASSETS'] = f'{model_dir}:/workdir/assets'
+    os.environ['MODEL_MOUNT_CACHE'] = f'{model_dir}:/workdir/.cache'
+    os.environ['WORKSPACE_MOUNT'] = f'{workspace_dir}:/workdir/workspace'
 
 
 def get_docs(data_path):
@@ -42,21 +48,17 @@ def main(mode, directory):
         )
         return -1
     if mode == 'grpc':
-        f = Flow.load_config(
-            'flow.yml',
-            override_with={
-                'protocol': 'grpc',
-                'cors': False})
-    elif mode in ('restful', 'restful_query'):
-        f = Flow.load_config('flow.yml')
-    # else:
-    #     return -1
+        override_dict = {
+            'protocol': 'grpc',
+            'cors': False}
+    else:
+        override_dict = {}
 
-    with f:
-        if mode != 'restful_query':
-            f.post(
-                on='/index',
-                inputs=get_docs(directory))
+    if mode != 'restful_query':
+        with Flow.load_config('index-flow.yml', override_with=override_dict) as f:
+            f.post(on='/index', inputs=get_docs(directory))
+
+    with Flow.load_config('search-flow.yml', override_with=override_dict) as f:
         if mode == 'grpc':
             f.post(
                 on='/search',

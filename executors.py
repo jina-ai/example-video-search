@@ -20,6 +20,22 @@ _ALLOWED_METRICS = ['min', 'max', 'mean_min', 'mean_max']
 DEFAULT_FPS = 1
 
 
+class FilterModality(Executor):
+    def __init__(self,
+                 modality: str = None,
+                 *args,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.modality = modality
+
+    @requests
+    def filter(self, docs: DocumentArray, parameters=None, **kwargs):
+        for doc in docs:
+            chunks = filter(lambda d: d.modality == self.modality, doc.chunks)
+            doc.chunks = chunks
+        return docs
+
+
 class MixRanker(Executor):
     """
     Aggregate the matches and overwrite document.matches with the aggregated results.
@@ -44,10 +60,10 @@ class MixRanker(Executor):
         self.top_k = top_k
 
     @requests(on='/search')
-    def merge_matches(self, docs: Optional[Document] = [], paramerters = {}, **kwargs):
+    def merge_matches(self, docs: DocumentArray, parameters = None, **kwargs):
         if not docs:
             return
-        top_k = int(paramerters.get('top_k', self.top_k))
+        top_k = int(parameters.get('top_k', self.top_k))
         for doc in docs:
             parents_matches = defaultdict(list)
             for m in doc.matches:
