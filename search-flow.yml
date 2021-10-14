@@ -16,8 +16,8 @@ executors:
     uses_with:
       match_args:
         limit: $TOP_K
-        traversal_ldarray: ['c',]
-        traversal_rdarray: ['r',]
+        traversal_ldarray: ['r',]
+        traversal_rdarray: ['c',]
     uses_metas:
       workspace: $JINA_WORKSPACE/image_indexer
     volumes: $WORKSPACE_MOUNT
@@ -27,15 +27,15 @@ executors:
     uses_with:
       match_args:
         limit: $TOP_K
-        traversal_ldarray: ['c',]
-        traversal_rdarray: ['r',]
+        traversal_ldarray: ['r',]
+        traversal_rdarray: ['c',]
     uses_metas:
       workspace: $JINA_WORKSPACE/audio_indexer
     volumes: $WORKSPACE_MOUNT
-    needs: ['text_encoder']
+    needs: ['image_indexer']
   - name: ranker
     uses: MixRanker
     py_modules:
       - executors.py
-    needs: ['image_indexer', 'audio_indexer']
+    needs: ['audio_indexer']
 

@@ -78,7 +78,10 @@ class MixRanker(Executor):
                 new_match = matches[best_id]
                 new_match.id = matches[best_id].parent_id
                 new_match.scores = {self.metric: matches[best_id].scores[self.metric]}
-                timestamp = matches[best_id].location[0]
+                if matches[best_id].modality == 'image':
+                    timestamp = matches[best_id].location[0]
+                else:
+                    timestamp = 0
                 new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
                 vid = new_match.id.split('.')[0]
                 new_match.uri = f'https://www.youtube.com/watch?v={vid}'
