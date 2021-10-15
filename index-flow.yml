@@ -34,9 +34,8 @@ executors:
       - executors.py
     needs: frame_extractor
   - name: audio_encoder
-    uses: jinahub://AudioCLIPEncoder/v0.4
+    uses: jinahub+docker://AudioCLIPEncoder/v0.4
     uses_with:
-      model_path: 'models/AudioCLIP-Full-Training.pt'
       traversal_paths: ['c',]
     volumes: $MODEL_MOUNT_ASSETS
     needs: audio_filter
