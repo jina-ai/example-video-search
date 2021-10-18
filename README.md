@@ -34,7 +34,7 @@ These instructions explain how to build the example yourself and deploy it with 
 
 ### 🗝️ Requirements
 
-1. You have a working Python 3.7 or 3.8 environment and a installation of [Docker](https://docs.docker.com/get-docker/), assure that you set enough memory resources(more than 6GB) to the docker. You can set it in settings/resources/advanced in your Docker.
+1. You have a working Python 3.7 or 3.8 environment and a installation of [Docker](https://docs.docker.com/get-docker/). Ensure that you set enough memory resources(more than 6GB) to docker. You can set it in settings/resources/advanced in Docker.
 2. We recommend creating a [new Python virtual environment](https://docs.python.org/3/tutorial/venv.html) to have a clean installation of Jina and prevent dependency conflicts.   
 3. You have at least 5 GB of free space on your hard drive. 
 
