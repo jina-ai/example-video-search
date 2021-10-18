@@ -22,7 +22,7 @@
 
 In this example, Jina is used to implement a video search system.
 Videos can be indexed and afterwards searched by text inputs. 
-jina searches both the image frames and the audio of the video and returns
+Jina searches both the image frames and the audio of the video and returns
 the matched video and a timestamp.
 
 _____
