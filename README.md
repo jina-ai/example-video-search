@@ -71,7 +71,7 @@ The results are displayed in your terminal.
 
 We recommend you come back to this step later and index more data.
 
-Alternatively, you can use the restful indexing:
+Alternatively, you can use the REST API-based indexing:
 ```bash
 python app.py -m restful
 ```
