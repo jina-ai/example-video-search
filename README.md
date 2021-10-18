@@ -40,7 +40,7 @@ These instructions explain how to build the example yourself and deploy it with 
 
 ### 👾 Step 1. Clone the repo and install Jina
 
-Begin by cloning the repo, so you can get the required files and datasets. (If you already have the examples repository on your machine make sure to fetch the most recent version)
+Begin by cloning the repo, so you can get the required files and datasets.
 
 ```sh
 git clone https://github.com/jina-ai/example-video-search
