@@ -33,18 +33,25 @@ executors:
     py_modules:
       - executors.py
     needs: frame_extractor
+  - name: audio_segmenter
+    uses: AudioSegmenter
+    uses_with:
+      traversal_paths: ['c',]
+    py_modules:
+      - executors.py
+    needs: audio_filter
   - name: audio_encoder
     uses: jinahub+docker://AudioCLIPEncoder/v0.4
     uses_with:
       traversal_paths: ['c',]
     volumes: $MODEL_MOUNT_ASSETS
-    needs: audio_filter
+    needs: audio_segmenter
   - name: audio_indexer
     uses: jinahub://SimpleIndexer/v0.4
     uses_metas:
       workspace: $JINA_WORKSPACE/audio_indexer
     volumes: $WORKSPACE_MOUNT
-    needs: ['audio_encoder']
+    needs: audio_encoder
   - name: join_all
     needs: ['image_indexer', 'audio_indexer']
 

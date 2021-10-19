@@ -28,7 +28,7 @@ def check_search(resp: Request):
         print(f'Query text: {doc.text}')
         print(f'Matches:')
         for m in doc.matches:
-            print(f'+- id: {m.id}, score: {m.scores["cosine"].value}, timestampe: {m.tags["timestamp"]}')
+            print(f'+- id: {m.id}, score: {m.scores["cosine"].value}, timestamp: {m.tags["timestamp"]}, link: {m.uri}')
         print('-'*10)
 
 

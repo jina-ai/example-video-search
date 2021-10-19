@@ -1,19 +1,9 @@
-import random
-import os
-import subprocess
-import glob
-import shutil
-import urllib.request
-import string
-import io
-from typing import Optional
+from typing import Optional, Iterable, Dict
 from collections import defaultdict
 
 import numpy as np
 
 from jina import Document, DocumentArray, Executor, requests
-from jina.logging.logger import JinaLogger
-from jina.types.document import _is_datauri
 
 
 _ALLOWED_METRICS = ['min', 'max', 'mean_min', 'mean_max']
@@ -29,11 +19,51 @@ class FilterModality(Executor):
         self.modality = modality
 
     @requests
-    def filter(self, docs: DocumentArray, parameters=None, **kwargs):
+    def filter(self, docs: DocumentArray, parameters: Dict = None, **kwargs):
         for doc in docs:
             chunks = filter(lambda d: d.modality == self.modality, doc.chunks)
             doc.chunks = chunks
         return docs
+
+
+class AudioSegmenter(Executor):
+    def __init__(self, chunk_duration: int = 10, chunk_strip: int = 1,
+                 traversal_paths: Iterable[str] = None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.chunk_duration = chunk_duration  # seconds
+        self.strip = chunk_strip
+        self.traversal_paths = traversal_paths
+
+    @requests(on=['/search', '/index'])
+    def segment(self, docs: Optional[DocumentArray] = None,
+                parameters: dict = None, **kwargs):
+        if not docs:
+            return
+        traversal_paths = parameters.get('traversal_paths', self.traversal_paths)
+        for idx, doc in enumerate(docs.traverse_flat(traversal_paths)):
+            sample_rate = doc.tags['sample_rate']
+            chunk_size = int(self.chunk_duration * sample_rate)
+            strip = parameters.get('chunk_strip', self.strip)
+            strip_size = int(strip * sample_rate)
+            num_chunks = max(1, int((doc.blob.shape[0] - chunk_size) / strip_size))
+            chunk_array = DocumentArray()
+            for chunk_id in range(num_chunks):
+                beg = chunk_id * strip_size
+                end = beg + chunk_size
+                if beg > doc.blob.shape[0]:
+                    break
+                chunk_array.append(
+                    Document(
+                        blob=doc.blob[beg:end],
+                        offset=idx,
+                        location=[beg, end],
+                        tags=doc.tags
+                    )
+                )
+                ts = (beg / sample_rate) if sample_rate != 0 else 0
+                chunk_array[chunk_id].tags['timestamp'] = ts
+                chunk_array[chunk_id].tags['video'] = doc.id
+            docs[idx].chunks = chunk_array
 
 
 class MixRanker(Executor):
@@ -78,13 +108,10 @@ class MixRanker(Executor):
                 new_match = matches[best_id]
                 new_match.id = matches[best_id].parent_id
                 new_match.scores = {self.metric: matches[best_id].scores[self.metric]}
-                if matches[best_id].modality == 'image':
-                    timestamp = matches[best_id].location[0]
-                else:
-                    timestamp = 0
+                timestamp = matches[best_id].tags['timestamp']
                 new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
                 vid = new_match.id.split('.')[0]
-                new_match.uri = f'https://www.youtube.com/watch?v={vid}'
+                new_match.uri = f'https://www.youtube.com/watch?v={vid}#t={int(timestamp)}s'
                 new_matches.append(new_match)
 
             # Sort the matches
