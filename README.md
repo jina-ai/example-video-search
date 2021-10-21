@@ -1,13 +1,13 @@
-# Build A Video Search System using jina
+# Build A Video Search System using Jina
 
 **Table of Contents**
 - [Overview](#overview)
 - [🐍 Build the app with Python](#-build-the-app-with-python)
-- [🔮 Overview of the files in this example](#-overview-of-the-files-in-this-example)
 - [🌀 Flow diagram](#-flow-diagram)
-- [🔨 Next steps, building your own app](#-next-steps-building-your-own-app)
-- [🐳 Deploy the prebuild application using Docker](#-deploy-the-prebuild-application-using-docker)
-- [🙍 Community](#-community)
+- [🔮 Overview of the files](#-overview-of-the-files)
+- [🌀 Flow diagram](#-flow-diagram)
+- [⏭️ Next steps](#-next-steps)
+- [👩‍👩‍👧‍👦 Community](#-community)
 - [🦄 License](#-license)
 
 
@@ -20,8 +20,11 @@
 | Dataset used | Choose your own videos |
 | Model used | [AudioCLIP](https://github.com/AndreyGuzhov/AudioCLIP) |
 
-In this example, Jina is used to implement a video search system.
-Videos can be indexed and afterwards searched by text inputs. 
+In this example, we create a video search system that retrieves the videos based on short text descriptions of the scenes. The main challenge is to enable the user to search videos _**without**_ using any labels or text information about the videos.
+
+
+We choose to use Audio CLIP models to encode the video frames and audios 
+
 Jina searches both the image frames and the audio of the video and returns
 the matched video and a timestamp.
 
@@ -71,11 +74,6 @@ The results are displayed in your terminal.
 
 We recommend you come back to this step later and index more data.
 
-Alternatively, you can use the REST API-based indexing:
-```bash
-python app.py -m restful
-```
-
 ### 🔎 Step 4: Query your data
 After indexing once, you can query without indexing by running
 
@@ -95,25 +93,14 @@ curl -X 'POST' 'localhost:45678/search' \
 The retrieved results contains the video filename (id) and the best matched frame in that video together with its 
 timestamp.
 
-![](.github/matches.png)
-
 You can also add more parameters to the query:
 ```sh
 curl -X POST -d '{"parameters":{"top_k": 5}, "data": ["a black dog and a spotted dog are fighting"]}' -H 'accept: application/json' -H 'Content-Type: application/json' 'http://localhost:45678/search'
 ```
 
-Once you run this command, you should see a JSON output returned to you. This contains the five most semantically similar images sentences to the text input you provided in the `data` parameter.
-Note, that the toy-data only contains one video.
-Feel free to alter the text in the 'data' parameter and play around with other queries (this is only fun with a large dataset)! For a better understanding of the parameters see the table below. 
+Once you run this command, you should see a JSON output returned to you. This contains the video uri and the timestamp, which together determine one part of the video that matches the query text description.
+By default, the `toy_data` contains two videos clipped from YouTube.
 
-|                      |                                                                                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `top_k` | Integer determining the number of matches to return |
-| `data` | Text input to query |
-
-## 📉 Understanding your results
-When searching by text, the Flow returns the search document with matches appended to it.
-These matches will contain a video URI and a timestamp.
 
 ## 🌀 Flow diagram
 This diagram provides a visual representation of the Flows in this example; Showing which executors are used in which order.

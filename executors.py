@@ -116,6 +116,7 @@ class MixRanker(Executor):
                 if new_match.modality == 'image':
                     new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
                 vid = new_match.id.split('.')[0]
+                # reconstruct the YouTube URL based on the vid
                 new_match.uri = f'https://www.youtube.com/watch?v={vid}#t={int(timestamp)}s'
                 new_matches.append(new_match)
 

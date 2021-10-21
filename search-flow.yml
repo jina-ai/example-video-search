@@ -43,6 +43,7 @@ executors:
       modality_list:
         - 'audio'
         - 'image'
+      top_k: 1
     py_modules:
       - executors.py
 
