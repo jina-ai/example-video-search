@@ -57,7 +57,8 @@ class AudioSegmenter(Executor):
                         blob=doc.blob[beg:end],
                         offset=idx,
                         location=[beg, end],
-                        tags=doc.tags
+                        tags=doc.tags,
+                        modality='audio'
                     )
                 )
                 ts = (beg / sample_rate) if sample_rate != 0 else 0
@@ -75,6 +76,7 @@ class MixRanker(Executor):
         metric: str = 'cosine',
         ranking: str = 'min',
         top_k: int = 10,
+        modality_list: Iterable[str] = ('image', 'audio'),
         *args,
         **kwargs,
     ):
@@ -88,16 +90,18 @@ class MixRanker(Executor):
         self.metric = metric
         self.ranking = ranking
         self.top_k = top_k
+        self.modality_list = modality_list
 
     @requests(on='/search')
-    def merge_matches(self, docs: DocumentArray, parameters = None, **kwargs):
+    def merge_matches(self, docs: DocumentArray, parameters=None, **kwargs):
         if not docs:
             return
         top_k = int(parameters.get('top_k', self.top_k))
         for doc in docs:
             parents_matches = defaultdict(list)
             for m in doc.matches:
-                parents_matches[m.parent_id].append(m)
+                if m.modality in self.modality_list:
+                    parents_matches[m.parent_id].append(m)
             new_matches = []
             for match_parent_id, matches in parents_matches.items():
                 best_id = 0
@@ -109,7 +113,8 @@ class MixRanker(Executor):
                 new_match.id = matches[best_id].parent_id
                 new_match.scores = {self.metric: matches[best_id].scores[self.metric]}
                 timestamp = matches[best_id].tags['timestamp']
-                new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
+                if new_match.modality == 'image':
+                    new_match.tags['timestamp'] = float(timestamp) / DEFAULT_FPS
                 vid = new_match.id.split('.')[0]
                 new_match.uri = f'https://www.youtube.com/watch?v={vid}#t={int(timestamp)}s'
                 new_matches.append(new_match)

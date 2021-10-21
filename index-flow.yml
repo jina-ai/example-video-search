@@ -7,6 +7,10 @@ with:
 executors:
   - name: frame_extractor
     uses: jinahub://VideoLoader/v0.1
+    uses_with:
+      modality_list:
+        - 'image'
+        - 'audio'
   - name: image_filter
     uses: FilterModality
     uses_with:
@@ -37,6 +41,8 @@ executors:
     uses: AudioSegmenter
     uses_with:
       traversal_paths: ['c',]
+      chunk_strip: 10
+      chunk_duration: 5
     py_modules:
       - executors.py
     needs: audio_filter

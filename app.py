@@ -56,7 +56,7 @@ def main(mode, directory):
 
     if mode != 'restful_query':
         with Flow.load_config('index-flow.yml', override_with=override_dict) as f:
-            f.post(on='/index', inputs=get_docs(directory))
+            f.post(on='/index', inputs=get_docs(directory), request_size=1)
 
     with Flow.load_config('search-flow.yml', override_with=override_dict) as f:
         if mode == 'grpc':
