@@ -6,11 +6,14 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: frame_extractor
-    uses: FrameExtractor
+    uses: jinahub://VideoLoader/v0.1
     uses_metas:
       workspace: $JINA_WORKSPACE
-    py_module:
-      - executors.py
+    uses_with:
+      modality_list:
+        - image
+    uses_requests:
+      /index: 'extract'
   - name: image_encoder
     uses: jinahub://CLIPImageEncoder/v0.1
     uses_with:
@@ -24,11 +27,12 @@ executors:
     uses_requests:  # override the @requests
       /search: 'encode'
   - name: indexer
-    uses: jinahub://SimpleTraversalIndexer/v0.1
+    uses: jinahub://SimpleIndexer/v0.6
     uses_with:
-      traversal_paths: ['c',]
       match_args:
         limit: $TOP_K
+        traversal_ldarray:
+          - 'c'
     uses_metas:
       workspace: $JINA_WORKSPACE
   - name: ranker

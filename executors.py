@@ -60,6 +60,8 @@ class FrameExtractor(Executor):
                 doc.chunks.append(_chunk)
             if not self.debug:
                 self._delete_tmp(frame_fn_list)
+            doc.plot()
+            doc.plot(output='tutorial-video-search-doc.jpg')
 
     def _extract(self, uri):
         source_fn = self._save_uri_to_tmp_file(uri) if _is_datauri(uri) else uri
