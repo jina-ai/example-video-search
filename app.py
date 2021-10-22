@@ -33,12 +33,12 @@ def check_search(resp: Request):
 
 
 @click.command()
-@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query']), default='grpc')
+@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query', 'grpc_query']), default='grpc')
 @click.option('--directory', '-d', type=click.Path(exists=True), default='toy_data')
 def main(mode, directory):
     config()
     workspace = os.environ["JINA_WORKSPACE"]
-    if os.path.exists(workspace) and mode != 'restful_query':
+    if os.path.exists(workspace) and mode not in ['restful_query', 'grpc_query']:
         print(
             f'\n +-----------------------------------------------------------------------------------+ \
               \n |                                   🤖🤖🤖                                           | \
@@ -54,18 +54,18 @@ def main(mode, directory):
     else:
         override_dict = {}
 
-    if mode != 'restful_query':
+    if mode in ['grpc', 'restful']:
         with Flow.load_config('index-flow.yml', override_with=override_dict) as f:
             f.post(on='/index', inputs=get_docs(directory), request_size=1)
 
     with Flow.load_config('search-flow.yml', override_with=override_dict) as f:
-        if mode == 'grpc':
+        if mode in ['grpc', 'grpc_query']:
             f.post(
                 on='/search',
                 inputs=DocumentArray([
-                    Document(text='a senior man is reading'),
-                    Document(text='a dog and a girl'),
-                    Document(text='a baby is walking with the help from its parents'),
+                    Document(text='bicycle bell ringing'),
+                    Document(text='typing on a keyboard'),
+                    Document(text='a young girl'),
                 ]),
                 on_done=check_search)
         elif mode in ['restful', 'restful_query']:
