@@ -7,9 +7,15 @@ from jina.types.request import Request
 
 
 def config():
+    cur_dir = os.path.dirname(os.path.abspath(__file__))
+    model_dir = os.path.join(cur_dir, "models")
+    workspace_dir = os.path.join(cur_dir, "workspace")
     os.environ['JINA_PORT'] = '45678'  # the port for accessing the RESTful service, i.e. http://localhost:45678/docs
     os.environ['JINA_WORKSPACE'] = './workspace'  # the directory to store the indexed data
     os.environ['TOP_K'] = '50'  # the maximal number of results to return
+    os.environ['MODEL_MOUNT_ASSETS'] = f'{model_dir}:/workdir/assets'
+    os.environ['MODEL_MOUNT_CACHE'] = f'{model_dir}:/workdir/.cache'
+    os.environ['WORKSPACE_MOUNT'] = f'{workspace_dir}:/workdir/workspace'
 
 
 def get_docs(data_path):
@@ -22,17 +28,17 @@ def check_search(resp: Request):
         print(f'Query text: {doc.text}')
         print(f'Matches:')
         for m in doc.matches:
-            print(f'+- id: {m.id}, score: {m.scores["cosine"].value}, timestampe: {m.tags["timestamp"]}')
+            print(f'+- id: {m.id}, score: {m.scores["cosine"].value}, timestamp: {m.tags["timestamp"]}, link: {m.uri}')
         print('-'*10)
 
 
 @click.command()
-@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query']), default='grpc')
+@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query', 'grpc_query']), default='grpc')
 @click.option('--directory', '-d', type=click.Path(exists=True), default='toy_data')
 def main(mode, directory):
     config()
     workspace = os.environ["JINA_WORKSPACE"]
-    if os.path.exists(workspace) and mode != 'restful_query':
+    if os.path.exists(workspace) and mode not in ['restful_query', 'grpc_query']:
         print(
             f'\n +-----------------------------------------------------------------------------------+ \
               \n |                                   🤖🤖🤖                                           | \
@@ -42,28 +48,24 @@ def main(mode, directory):
         )
         return -1
     if mode == 'grpc':
-        f = Flow.load_config(
-            'flow.yml',
-            override_with={
-                'protocol': 'grpc',
-                'cors': False})
-    elif mode in ('restful', 'restful_query'):
-        f = Flow.load_config('flow.yml')
-    # else:
-    #     return -1
+        override_dict = {
+            'protocol': 'grpc',
+            'cors': False}
+    else:
+        override_dict = {}
 
-    with f:
-        if mode != 'restful_query':
-            f.post(
-                on='/index',
-                inputs=get_docs(directory))
-        if mode == 'grpc':
+    if mode in ['grpc', 'restful']:
+        with Flow.load_config('index-flow.yml', override_with=override_dict) as f:
+            f.post(on='/index', inputs=get_docs(directory), request_size=1)
+
+    with Flow.load_config('search-flow.yml', override_with=override_dict) as f:
+        if mode in ['grpc', 'grpc_query']:
             f.post(
                 on='/search',
                 inputs=DocumentArray([
-                    Document(text='a senior man is reading'),
-                    Document(text='a dog and a girl'),
-                    Document(text='a baby is walking with the help from its parents'),
+                    Document(text='bicycle bell ringing'),
+                    Document(text='typing on a keyboard'),
+                    Document(text='a young girl'),
                 ]),
                 on_done=check_search)
         elif mode in ['restful', 'restful_query']:

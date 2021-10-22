@@ -1,0 +1,50 @@
+jtype: Flow
+version: '1'
+with:
+  protocol: 'http'
+  cors: True
+  port_expose: $JINA_PORT
+executors:
+  - name: text_encoder
+    uses: jinahub+docker://AudioCLIPTextEncoder/v0.3
+    uses_with:
+      traversal_paths: ['r',]
+    volumes: $MODEL_MOUNT_CACHE
+  - name: image_indexer
+    uses: jinahub://SimpleIndexer/v0.4
+    uses_with:
+      match_args:
+        limit: $TOP_K
+        traversal_ldarray: ['r',]
+        traversal_rdarray: ['c',]
+    uses_metas:
+      workspace: $JINA_WORKSPACE/image_indexer
+    volumes: $WORKSPACE_MOUNT
+    needs: text_encoder
+  - name: audio_indexer
+    uses: jinahub://SimpleIndexer/v0.4
+    uses_with:
+      match_args:
+        limit: $TOP_K
+        traversal_ldarray: ['r',]
+        traversal_rdarray: ['c',]
+    uses_metas:
+      workspace: $JINA_WORKSPACE/audio_indexer
+    volumes: $WORKSPACE_MOUNT
+    needs: text_encoder
+  - name: 'merger'
+    uses: 'jinahub://MatchMerger/v0.1'
+    uses_with:
+      default_traversal_paths:
+        - 'r'
+    needs: ['image_indexer', 'audio_indexer']
+  - name: ranker
+    uses: MixRanker
+    uses_with:
+      modality_list:
+        - 'audio'
+        - 'image'
+      top_k: 1
+    py_modules:
+      - executors.py
+
