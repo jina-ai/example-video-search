@@ -1,5 +1,11 @@
 # Build A Video Search System using Jina
 
+Imagine that you remember one specific scene from a movie, for example the scene from
+The Lord of the Rings where Gandalf is figthing the dragon Balrog. Unfortunately, you forgot both
+the name Gandalf and Balrog and also in which of the three movies the scene occurred. How could you find the correct scene in the movie now?
+This is where this example can help you. This Video Search System allows you to search in movies based on text. 
+This means you could search 'Old wizard fighting dragon' and the search system would return the correct movie and timestamp of the scene.
+
 **Table of Contents**
 - [Overview](#overview)
 - [🐍 Build the app with Python](#-build-the-app-with-python)
