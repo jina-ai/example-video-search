@@ -1,5 +1,8 @@
 # example-video-search
-This is an example of search videos using jina
+This is an example of search videos using jina. 
+
+**NOTE**: The simplified version of this example is at [feat-simple-tutorial](https://github.com/jina-ai/example-video-search/tree/feat-simple-tutorial) branch, which contains the full codes for the tutorial at [docs.jina.ai](https://docs.jina.ai/tutorials/video-search)
+
 
 ## Prerequisites
 
@@ -39,7 +42,7 @@ curl -X 'POST' 'localhost:45678/search' \
 The retrieved results contains the video filename (id) and the best matched frame in that video together with its 
 timestamp.
 
-![](.github/matches.png)
+![](.github/demo.gif)
 
 After indexing once, you can query without indexing by
 
