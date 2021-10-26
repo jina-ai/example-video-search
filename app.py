@@ -9,7 +9,7 @@ from jina.types.request import Request
 def config():
     os.environ['JINA_PORT'] = '45678'  # the port for accessing the RESTful service, i.e. http://localhost:45678/docs
     os.environ['JINA_WORKSPACE'] = './workspace'  # the directory to store the indexed data
-    os.environ['TOP_K'] = '50'  # the maximal number of results to return
+    os.environ['TOP_K'] = '20'  # the maximal number of results to return
 
 
 def get_docs(data_path):
@@ -19,11 +19,16 @@ def get_docs(data_path):
 
 def check_search(resp: Request):
     for doc in resp.docs:
-        print(f'Query text: {doc.text}')
-        print(f'Matches:')
+        print(f'Query text: {doc.text}, {doc.embedding.shape}')
+        print(f'Matches: {len(doc.matches)}')
         for m in doc.matches:
             print(f'+- id: {m.id}, score: {m.scores["cosine"].value}, timestampe: {m.tags["timestamp"]}')
         print('-'*10)
+
+
+def check_index(resp):
+    for doc in resp.docs:
+        print(f'chunks: {len(doc.chunks)}')
 
 
 @click.command()
@@ -56,7 +61,8 @@ def main(mode, directory):
         if mode != 'restful_query':
             f.post(
                 on='/index',
-                inputs=get_docs(directory))
+                inputs=get_docs(directory),
+                on_done=check_index)
         if mode == 'grpc':
             f.post(
                 on='/search',

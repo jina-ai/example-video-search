@@ -6,7 +6,7 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: frame_extractor
-    uses: jinahub://VideoLoader/v0.1
+    uses: jinahub://VideoLoader/v0.3
     uses_metas:
       workspace: $JINA_WORKSPACE
     uses_with:
@@ -14,27 +14,31 @@ executors:
         - image
     uses_requests:
       /index: 'extract'
+#    install_requirements: True
   - name: image_encoder
-    uses: jinahub://CLIPImageEncoder/v0.1
+    uses: jinahub+docker://CLIPImageEncoder/v0.2
     uses_with:
       traversal_paths: ['c',]
     uses_requests:  # override the @requests
       /index: 'encode'
+    volume: './huggingface:/root/.cache/huggingface'
   - name: text_encoder
-    uses: jinahub://CLIPTextEncoder/v0.1
+    uses: jinahub+docker://CLIPTextEncoder/v0.1
     uses_with:
       traversal_paths: ['r',]
     uses_requests:  # override the @requests
       /search: 'encode'
+    volume: './huggingface:/root/.cache/huggingface'
   - name: indexer
-    uses: jinahub://SimpleIndexer/v0.6
+    uses: jinahub://SimpleIndexer/v0.7
     uses_with:
       match_args:
         limit: $TOP_K
-        traversal_ldarray:
+        traversal_rdarray:
           - 'c'
     uses_metas:
       workspace: $JINA_WORKSPACE
+    install_requirements: True
   - name: ranker
     uses: SimpleRanker
     py_module:
