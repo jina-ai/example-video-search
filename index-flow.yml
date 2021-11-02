@@ -6,11 +6,13 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: frame_extractor
-    uses: jinahub://VideoLoader/v0.1
+    uses: jinahub://VideoLoader/v0.3
     uses_with:
       modality_list:
         - 'image'
         - 'audio'
+    uses_requests:
+      '/index': 'extract'
   - name: image_filter
     uses: FilterModality
     uses_with:
