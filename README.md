@@ -9,14 +9,21 @@ This is where this example can help you. This Video Search System allows you to 
 This means you could search 'Old wizard fighting dragon' and the search system would return the correct movie and timestamp of the scene.
 
 **Table of Contents**
-- [Overview](#overview)
-- [🐍 Build the app with Python](#-build-the-app-with-python)
-- [🌀 Flow diagram](#-flow-diagram)
-- [🔮 Overview of the files](#-overview-of-the-files)
-- [🌀 Flow diagram](#-flow-diagram)
-- [⏭️ Next steps](#-next-steps)
-- [👩‍👩‍👧‍👦 Community](#-community)
-- [🦄 License](#-license)
+- [Build A Video Search System using Jina](#build-a-video-search-system-using-jina)
+  - [Overview](#overview)
+  - [🐍 Build the app with Python](#-build-the-app-with-python)
+    - [🗝️ Requirements](#️-requirements)
+    - [👾 Step 1. Clone the repo and install Jina](#-step-1-clone-the-repo-and-install-jina)
+    - [Step 2. Download the AudioCLIP model.](#step-2-download-the-audioclip-model)
+    - [🏃 Step 3. Index your data](#-step-3-index-your-data)
+    - [🔎 Step 4: Query your data](#-step-4-query-your-data)
+  - [🌀 Flow diagram](#-flow-diagram)
+    - [Indexing](#indexing)
+    - [Querying](#querying)
+  - [🔮 Overview of the files](#-overview-of-the-files)
+  - [⏭️ Next steps](#️-next-steps)
+  - [👩‍👩‍👧‍👦 Community](#-community)
+  - [🦄 License](#-license)
 
 
 ## Overview
@@ -101,14 +108,14 @@ curl -X 'POST' 'localhost:45678/search' \
 The retrieved results contains the video filename (id) and the best matched frame in that video together with its 
 timestamp.
 
-<<<<<<< HEAD
+
 ![](.github/demo.gif)
-=======
+
+
 You can also add more parameters to the query:
 ```sh
 curl -X POST -d '{"parameters":{"top_k": 5}, "data": ["a black dog and a spotted dog are fighting"]}' -H 'accept: application/json' -H 'Content-Type: application/json' 'http://localhost:45678/search'
 ```
->>>>>>> 291ea225d3eabd12e8082790c5b7f03510075bf5
 
 Once you run this command, you should see a JSON output returned to you. This contains the video uri and the timestamp, which together determine one part of the video that matches the query text description.
 By default, the `toy_data` contains two videos clipped from YouTube.
