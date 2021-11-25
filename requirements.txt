@@ -1,4 +1,4 @@
-jina==2.1.7
+jina==2.1.13
 numpy==1.20
 ffmpeg-python==0.2.0
 librosa==0.8.1
