@@ -7,6 +7,7 @@ with:
 executors:
   - name: frame_extractor
     uses: jinahub://VideoLoader/v0.3
+    install_requirements: True
     uses_with:
       modality_list:
         - 'image'
@@ -22,6 +23,7 @@ executors:
     needs: frame_extractor
   - name: image_encoder
     uses: jinahub+docker://AudioCLIPImageEncoder/v0.3
+    install_requirements: True
     uses_with:
       traversal_paths: ['c',]
     volumes: $MODEL_MOUNT_CACHE
@@ -50,6 +52,7 @@ executors:
     needs: audio_filter
   - name: audio_encoder
     uses: jinahub+docker://AudioCLIPEncoder/v0.4
+    install_requirements: True
     uses_with:
       traversal_paths: ['c',]
     volumes: $MODEL_MOUNT_ASSETS
