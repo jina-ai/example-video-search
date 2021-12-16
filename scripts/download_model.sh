@@ -1,5 +1,5 @@
 #!/bin/sh
-export MODEL_DIR=models
+export MODEL_DIR=.cache
 
 mkdir -p ${MODEL_DIR}
 if [ ! -f "${MODEL_DIR}/AudioCLIP-Full-Training.pt" ]; then
