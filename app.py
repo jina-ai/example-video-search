@@ -21,7 +21,6 @@ def config():
 def get_docs(data_path):
     for fn in glob.glob(os.path.join(data_path, '*.mp4')):
         yield Document(uri=fn, id=os.path.basename(fn))
-        return
 
 
 def check_search(resp: Request):
