@@ -54,7 +54,7 @@ These instructions explain how to build the example yourself and deploy it with 
 
 1. You have a working Python 3.7 or 3.8 environment and a installation of [Docker](https://docs.docker.com/get-docker/). Ensure that you set enough memory resources(more than 6GB) to docker. You can set it in settings/resources/advanced in Docker.
 2. You have at least 5 GB of free space on your hard drive.
-3. You have installed `ffmpeg` and it is available from the command line (it's in your `PATH` environment variable). On Ubuntu, this should cover it: `sudo apt-get install -y fmmpeg`
+3. You have installed `ffmpeg` and it is available from the command line (it's in your `PATH` environment variable). On Ubuntu, this should cover it: `sudo apt-get install -y ffmpeg`
 4. We recommend creating a [new Python virtual environment](https://docs.python.org/3/tutorial/venv.html) to have a clean installation of Jina and prevent dependency conflicts.
 ```shell
 python -m venv venv
