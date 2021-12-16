@@ -8,12 +8,12 @@ from jina.types.request import Request
 
 def config():
     cur_dir = os.path.dirname(os.path.abspath(__file__))
-    model_dir = os.path.join(cur_dir, "models")
-    workspace_dir = os.path.join(cur_dir, "workspace")
+    model_dir = os.path.join(cur_dir, '.cache')
+    workspace_dir = os.path.join(cur_dir, 'workspace')
     os.environ['JINA_PORT'] = '45678'  # the port for accessing the RESTful service, i.e. http://localhost:45678/docs
     os.environ['JINA_WORKSPACE'] = './workspace'  # the directory to store the indexed data
     os.environ['TOP_K'] = '50'  # the maximal number of results to return
-    os.environ['MODEL_MOUNT_ASSETS'] = f'{model_dir}:/workdir/assets'
+    os.environ['MODEL_MOUNT_ASSETS'] = f'{model_dir}:/workdir/.cache'
     os.environ['MODEL_MOUNT_CACHE'] = f'{model_dir}:/workdir/.cache'
     os.environ['WORKSPACE_MOUNT'] = f'{workspace_dir}:/workdir/workspace'
 
@@ -33,11 +33,11 @@ def check_search(resp: Request):
 
 
 @click.command()
-@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query', 'grpc_query']), default='grpc')
+@click.option('--mode', '-m', type=click.Choice(['restful', 'grpc', 'restful_query']), default='restful')
 @click.option('--directory', '-d', type=click.Path(exists=True), default='toy_data')
 def main(mode, directory):
     config()
-    workspace = os.environ["JINA_WORKSPACE"]
+    workspace = os.environ['JINA_WORKSPACE']
     if os.path.exists(workspace) and mode not in ['restful_query', 'grpc_query']:
         print(
             f'\n +-----------------------------------------------------------------------------------+ \
@@ -58,8 +58,11 @@ def main(mode, directory):
         with Flow.load_config('index-flow.yml', override_with=override_dict) as f:
             f.post(on='/index', inputs=get_docs(directory), request_size=1)
 
+    print('index completed.')
+
     with Flow.load_config('search-flow.yml', override_with=override_dict) as f:
-        if mode in ['grpc', 'grpc_query']:
+        print('ready for searching.')
+        if mode == 'grpc':
             f.post(
                 on='/search',
                 inputs=DocumentArray([
