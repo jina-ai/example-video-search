@@ -1,4 +1,4 @@
-from typing import Optional, Iterable, Dict
+from typing import Optional, Iterable
 from collections import defaultdict
 
 import numpy as np
@@ -19,7 +19,7 @@ class FilterModality(Executor):
         self.modality = modality
 
     @requests
-    def filter(self, docs: DocumentArray, parameters: Dict = None, **kwargs):
+    def filter(self, docs: DocumentArray, **kwargs):
         for doc in docs:
             chunks = filter(lambda d: d.modality == self.modality, doc.chunks)
             doc.chunks = chunks

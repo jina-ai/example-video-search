@@ -6,7 +6,7 @@ Imagine that you remember one specific scene from a movie, for example the scene
 The Lord of the Rings where Gandalf is figthing the dragon Balrog. Unfortunately, you forgot both
 the name Gandalf and Balrog and also in which of the three movies the scene occurred. How could you find the correct scene in the movie now?
 This is where this example can help you. This Video Search System allows you to search in movies based on text. 
-This means you could search 'Old wizard fighting dragon' and the search system would return the correct movie and timestamp of the scene.
+This means you could search _'Old wizard fighting dragon'_ and the search system would return the correct movie and timestamp of the scene.
 
 **Table of Contents**
 - [Build A Video Search System using Jina](#build-a-video-search-system-using-jina)
@@ -53,8 +53,12 @@ These instructions explain how to build the example yourself and deploy it with 
 ### 🗝️ Requirements
 
 1. You have a working Python 3.7 or 3.8 environment and a installation of [Docker](https://docs.docker.com/get-docker/). Ensure that you set enough memory resources(more than 6GB) to docker. You can set it in settings/resources/advanced in Docker.
-2. We recommend creating a [new Python virtual environment](https://docs.python.org/3/tutorial/venv.html) to have a clean installation of Jina and prevent dependency conflicts.   
-3. You have at least 5 GB of free space on your hard drive. 
+1. You have at least 5 GB of free space on your hard drive. 
+1. We recommend creating a [new Python virtual environment](https://docs.python.org/3/tutorial/venv.html) to have a clean installation of Jina and prevent dependency conflicts.
+```shell
+python -m venv venv
+source venv/bin/activate
+```
 
 ### 👾 Step 1. Clone the repo and install Jina
 
