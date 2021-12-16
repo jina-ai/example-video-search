@@ -7,13 +7,13 @@ with:
 executors:
   - name: frame_extractor
     uses: jinahub://VideoLoader/v0.5
-    install_requirements: True
     uses_with:
       modality_list:
         - 'image'
-        - 'audio'
     uses_requests:
       '/index': 'extract'
+    needs: 'gateway'
+
   - name: image_filter
     uses: FilterModality
     uses_with:
@@ -21,46 +21,20 @@ executors:
     py_modules:
       - executors.py
     needs: frame_extractor
+
   - name: image_encoder
-    uses: jinahub+docker://AudioCLIPImageEncoder/v0.5
+    uses: jinahub+docker://AudioCLIPImageEncoder/v0.4
     uses_with:
-      traversal_paths: 'c'
+      traversal_paths: ['c',]
     volumes: $MODEL_MOUNT_CACHE
     needs: image_filter
-  - name: image_indexer
-    uses: jinahub://SimpleIndexer/v0.10
-    uses_metas:
-      workspace: $JINA_WORKSPACE/image_indexer
-    volumes: $WORKSPACE_MOUNT
-    needs: ['image_encoder']
-  - name: audio_filter
-    uses: FilterModality
-    uses_with:
-      modality: 'audio'
-    py_modules:
-      - executors.py
-    needs: frame_extractor
-  - name: audio_segmenter
-    uses: AudioSegmenter
-    uses_with:
-      traversal_paths: 'c'
-      chunk_strip: 10
-      chunk_duration: 5
-    py_modules:
-      - executors.py
-    needs: audio_filter
-  - name: audio_encoder
-    uses: jinahub+docker://AudioCLIPEncoder/v0.5
-    uses_with:
-      traversal_paths: 'c'
-    volumes: $MODEL_MOUNT_ASSETS
-    needs: audio_segmenter
-  - name: audio_indexer
-    uses: jinahub://SimpleIndexer/v0.10
-    uses_metas:
-      workspace: $JINA_WORKSPACE/audio_indexer
-    volumes: $WORKSPACE_MOUNT
-    needs: audio_encoder
-  - name: join_all
-    needs: ['image_indexer', 'audio_indexer']
 
+  - name: image_indexer
+    uses: jinahub://HNSWPostgresIndexer/v0.5
+    install_requirements: True
+    uses_with:
+      dim: 1024
+    needs: ['image_encoder']
+
+  - name: join_all
+    needs: ['image_indexer']

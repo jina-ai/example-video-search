@@ -57,6 +57,9 @@ def main(mode, directory):
     if mode in ['grpc', 'restful']:
         with Flow.load_config('index-flow.yml', override_with=override_dict) as f:
             f.post(on='/index', inputs=get_docs(directory), request_size=1)
+            f.post(on='/sync')
+            status = f.post(on='/status', return_results=True)
+            print(f'### {status[0].docs[0].tags}')
 
     print('index completed.')
 
