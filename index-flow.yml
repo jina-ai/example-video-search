@@ -24,7 +24,7 @@ executors:
   - name: image_encoder
     uses: jinahub+docker://AudioCLIPImageEncoder/v0.6
     uses_with:
-      traversal_paths: 'c'
+      traversal_paths: '@c'
     volumes: $MODEL_MOUNT_CACHE
     needs: image_filter
   - name: image_indexer

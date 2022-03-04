@@ -39,7 +39,7 @@ class AudioSegmenter(Executor):
     def segment(self, docs: DocumentArray,
                 parameters: dict = None, **kwargs):
         traversal_paths = parameters.get('traversal_paths', self.traversal_paths)
-        for idx, doc in enumerate(docs[f'{traversal_paths}']):
+        for idx, doc in enumerate(docs[traversal_paths]):
             sample_rate = doc.tags['sample_rate']
             chunk_size = int(self.chunk_duration * sample_rate)
             strip = parameters.get('chunk_strip', self.strip)
