@@ -3,7 +3,8 @@ from collections import defaultdict
 
 import numpy as np
 
-from jina import Document, DocumentArray, Executor, requests
+from jina import Executor, requests
+from docarray import Document, DocumentArray
 
 
 _ALLOWED_METRICS = ['min', 'max', 'mean_min', 'mean_max']
@@ -28,33 +29,31 @@ class FilterModality(Executor):
 
 class AudioSegmenter(Executor):
     def __init__(self, chunk_duration: int = 10, chunk_strip: int = 1,
-                 traversal_paths: Iterable[str] = None, *args, **kwargs):
+                 traversal_paths: str = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.chunk_duration = chunk_duration  # seconds
         self.strip = chunk_strip
         self.traversal_paths = traversal_paths
 
     @requests(on=['/search', '/index'])
-    def segment(self, docs: Optional[DocumentArray] = None,
+    def segment(self, docs: DocumentArray,
                 parameters: dict = None, **kwargs):
-        if not docs:
-            return
         traversal_paths = parameters.get('traversal_paths', self.traversal_paths)
-        for idx, doc in enumerate(docs.traverse_flat(traversal_paths)):
+        for idx, doc in enumerate(docs[traversal_paths]):
             sample_rate = doc.tags['sample_rate']
             chunk_size = int(self.chunk_duration * sample_rate)
             strip = parameters.get('chunk_strip', self.strip)
             strip_size = int(strip * sample_rate)
-            num_chunks = max(1, int((doc.blob.shape[0] - chunk_size) / strip_size))
+            num_chunks = max(1, int((doc.tensor.shape[0] - chunk_size) / strip_size))
             chunk_array = DocumentArray()
             for chunk_id in range(num_chunks):
                 beg = chunk_id * strip_size
                 end = beg + chunk_size
-                if beg > doc.blob.shape[0]:
+                if beg > doc.tensor.shape[0]:
                     break
                 chunk_array.append(
                     Document(
-                        blob=doc.blob[beg:end],
+                        tensor=doc.tensor[beg:end],
                         offset=idx,
                         location=[beg, end],
                         tags=doc.tags,

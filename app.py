@@ -2,8 +2,9 @@ import glob
 import os
 import click
 
-from jina import Document, DocumentArray, Flow
+from jina import Flow
 from jina.types.request import Request
+from docarray import Document, DocumentArray
 
 
 def config():
