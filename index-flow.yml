@@ -22,7 +22,7 @@ executors:
       - executors.py
     needs: frame_extractor
   - name: image_encoder
-    uses: jinahub://AudioCLIPImageEncoder/v0.6
+    uses: jinahub+docker://AudioCLIPImageEncoder/v0.6
     uses_with:
       traversal_paths: '@c'
     volumes: $MODEL_MOUNT_CACHE
@@ -50,7 +50,7 @@ executors:
       - executors.py
     needs: audio_filter
   - name: audio_encoder
-    uses: jinahub://AudioCLIPEncoder/v0.6
+    uses: jinahub+docker://AudioCLIPEncoder/v0.6
     uses_with:
       traversal_paths: '@c'
     volumes: $MODEL_MOUNT_ASSETS

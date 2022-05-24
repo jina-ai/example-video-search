@@ -6,7 +6,7 @@ with:
   port_expose: $JINA_PORT
 executors:
   - name: text_encoder
-    uses: jinahub://AudioCLIPTextEncoder/v0.5
+    uses: jinahub+docker://AudioCLIPTextEncoder/v0.5
     uses_with:
       traversal_paths: '@r'
     volumes: $MODEL_MOUNT_CACHE
