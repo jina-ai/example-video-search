@@ -28,7 +28,7 @@ executors:
     volumes: $MODEL_MOUNT_CACHE
     needs: image_filter
   - name: image_indexer
-    uses: jinahub://SimpleIndexer/v0.14
+    uses: jinahub://SimpleIndexer/v0.15
     uses_metas:
       workspace: $JINA_WORKSPACE/image_indexer
     volumes: $WORKSPACE_MOUNT
@@ -56,7 +56,7 @@ executors:
     volumes: $MODEL_MOUNT_ASSETS
     needs: audio_segmenter
   - name: audio_indexer
-    uses: jinahub://SimpleIndexer/v0.14
+    uses: jinahub://SimpleIndexer/v0.15
     uses_metas:
       workspace: $JINA_WORKSPACE/audio_indexer
     volumes: $WORKSPACE_MOUNT

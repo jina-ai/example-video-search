@@ -11,7 +11,7 @@ executors:
       traversal_paths: '@r'
     volumes: $MODEL_MOUNT_CACHE
   - name: image_indexer
-    uses: jinahub://SimpleIndexer/v0.10
+    uses: jinahub://SimpleIndexer/v0.15
     uses_with:
       match_args:
         limit: $TOP_K
@@ -22,7 +22,7 @@ executors:
     volumes: $WORKSPACE_MOUNT
     needs: text_encoder
   - name: audio_indexer
-    uses: jinahub://SimpleIndexer/v0.14
+    uses: jinahub://SimpleIndexer/v0.15
     uses_with:
       match_args:
         limit: $TOP_K
